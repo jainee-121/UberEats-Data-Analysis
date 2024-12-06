@@ -39,12 +39,12 @@ with col2:
     st.bar_chart(hist_values)
 
 # Map
-if st.checkbox('Show raw data'):
-    st.subheader('Raw data')
-    st.write(data)
+    if st.checkbox('Show raw data'):
+        st.subheader('Raw data')
+        st.write(data)
 
-hour_to_filter = st.slider('hour', 0, 23, 17)  # min: 0h, max: 23h, default: 17h
-filtered_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
-st.subheader(f'Map of all pickups at {hour_to_filter}:00')
-st.map(filtered_data)
+    hour_to_filter = st.slider('hour', 0, 23, 17)  # min: 0h, max: 23h, default: 17h
+    filtered_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
+    st.subheader(f'Map of all pickups at {hour_to_filter}:00')
+    st.map(filtered_data)
 
