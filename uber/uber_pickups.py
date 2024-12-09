@@ -42,11 +42,19 @@ data = st.session_state.data
 data_load_state.text("View Raw Data" if not data.empty else "No data available.")    
 
 if not data.empty:
-    c=st.selectbox("Select Lat",("ALL",40.74,40.75,40.695))
-    if c=="ALL":
-        st.write(data) 
-    else:
-        data=data[data['lat']==c]
-        st.write(data) 
+    if st.session_state.selected=="DATA URL":
+        c=st.selectbox("Select Lat",("ALL",40.74,40.75,40.695))
+        if c=="ALL":
+            st.write(data) 
+        else:
+            data=data[data['lat']==c]
+            st.write(data) 
+    elif st.session_state.selected=="Upload file":
+        c=st.selectbox("Select Age",("ALL",30,40,60))
+        if c=="ALL":
+            st.write(data) 
+        else:
+            data=data[data.Age==c]
+            st.write(data) 
 else:
     st.warning("No data available to display.")
