@@ -8,34 +8,45 @@ DATE_COLUMN = 'date/time'
 DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
          'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
 
+if "selected" not in st.session_state:
+    st.session_state.selected="None"
+if "data" not in st.session_state:
+    st.session_state.data = pd.DataFrame() 
 
-b=st.selectbox("Select",("None","DATA URL","Upload file"))
-file=st.sidebar.file_uploader("choose a file to upload",type="csv")
-data=st.empty()
+b=st.selectbox("Select",("None","DATA URL","Upload file"),index=["None", "DATA URL", "Upload file"].index(st.session_state.selected))
+
+if b != st.session_state.selected:
+    st.session_state.selected = b
+    st.session_state.data = pd.DataFrame()
+    
+file= st.file_uploader("Choose a file to upload", type="csv") if b == "Upload file" else None
+
 @st.cache_resource
-def load_data():
+def load_data(b,file):
     if b=="DATA URL":
         data = pd.read_csv(DATA_URL, nrows=1000)
         lowercase = lambda x: str(x).lower()
         data.rename(lowercase,axis=1, inplace=True)
         data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
         return data
-    if b=="Upload file":
+    elif b=="Upload file" and file is not None:
         data=pd.read_csv(file)
         return data
-    return st.write("select something nah!!")
-
+    return pd.DataFrame()
 
 st.sidebar.header("View Raw Data")
+data_load_state = st.text('Loading data...')    
+if st.session_state.selected != "None" and st.session_state.data.empty:
+    st.session_state.data = load_data(st.session_state.selected,file)
+data = st.session_state.data
+data_load_state.text("View Raw Data" if not data.empty else "No data available.")    
 
-data_load_state = st.text('Loading data...')
-# Load 10,000 rows of data into the dataframe.
-data = load_data()
-# Notify the reader that the data was successfully loaded.
-data_load_state.text("View Raw Data")   
-c=st.selectbox("Select Lat",("ALL",40.74,40.75,40.695))
-if c=="ALL":
-    st.write(data) 
+if not data.empty:
+    c=st.selectbox("Select Lat",("ALL",40.74,40.75,40.695))
+    if c=="ALL":
+        st.write(data) 
+    else:
+        data=data[data['lat']==c]
+        st.write(data) 
 else:
-    data=data[data['lat']==c]
-    st.write(data) 
+    st.warning("No data available to display.")
